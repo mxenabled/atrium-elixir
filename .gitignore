@@ -1,0 +1,10 @@
+# App artifacts
+/_build
+/db
+/deps
+/*.ez
+sys.config
+.sobelow
+
+# Generated on crash by the VM
+erl_crash.dump
