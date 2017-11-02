@@ -150,7 +150,10 @@ defmodule AtriumClient do
   # Required Parameters: userGUID, memberGUID, answersMFA
   # Optional Parameters: None
   def resumeMemberAggregation(userGUID, memberGUID, answers) do
-    makeRequest("PUT", "/users/" <> userGUID <> "/members/" <> memberGUID <> "/resume", answers)
+    data = %{member: %{challenges: answers}}
+    body = Poison.encode!(data)
+
+    makeRequest("PUT", "/users/" <> userGUID <> "/members/" <> memberGUID <> "/resume", body)
   end
 
   # Required Parameters: userGUID, memberGUID

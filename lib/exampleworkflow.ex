@@ -61,16 +61,26 @@ defmodule ExampleWorkflow do
               challengeResponse = AtriumClient.listMemberMFAChallenges(userGUID, memberGUID, "", "")
               {:ok, parsedJSON} = Poison.decode(to_string(challengeResponse))
 
-              {:ok, answer} = Agent.start_link fn -> [] end
-              Agent.update(answer, fn list -> ["]}}" | list] end)
-              Enum.each(parsedJSON["challenges"], fn item ->
-                cred = String.trim(IO.gets(to_string(item["label"]) <> ": "))
-                Agent.update(answer, fn list -> [",{\"guid\":\"" <> item["guid"] <> "\",\"value\":\"" <> cred <> "\"}" | list] end)
-              end)
-              ans = String.slice(to_string(Agent.get(answer, fn list -> list end)), 1..-1)
-              ans = "{\"member\":{\"challenges\":[" <> ans
+              # {:ok, answer} = Agent.start_link fn -> [] end
+              # Agent.update(answer, fn list -> ["]}}" | list] end)
+              # Enum.each(parsedJSON["challenges"], fn item ->
+              #   cred = String.trim(IO.gets(to_string(item["label"]) <> ": "))
+              #   Agent.update(answer, fn list -> [",{\"guid\":\"" <> item["guid"] <> "\",\"value\":\"" <> cred <> "\"}" | list] end)
+              # end)
+              # ans = String.slice(to_string(Agent.get(answer, fn list -> list end)), 1..-1)
+              # ans = "{\"member\":{\"challenges\":[" <> ans
 
-              AtriumClient.resumeMemberAggregation(userGUID, memberGUID, ans)
+              #
+              {:ok, answer} = Agent.start_link fn -> [] end
+              Enum.each(parsedJSON["challenges"], fn item ->
+                cred = String.trim(IO.gets("\nPlease enter in " <> to_string(item["label"]) <> ": "))
+                Agent.update(answer, fn list -> [%{guid: item["guid"], value: cred} | list] end)
+              end)
+
+              creds = Agent.get(answer, fn list -> list end)
+              #
+
+              AtriumClient.resumeMemberAggregation(userGUID, memberGUID, creds)
 
               checkJobStatus(userGUID, memberGUID, counter)
             else
