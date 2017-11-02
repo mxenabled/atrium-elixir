@@ -1,4 +1,4 @@
-defmodule AtriumClient do
+defmodule Atrium do
   @mxAPIKEY "YOUR_MX_API_KEY"
   @mxCLIENTID "YOUR_MX_CLIENT_ID"
   @environment "ENVIRONMENT"
