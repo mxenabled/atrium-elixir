@@ -1,6 +1,6 @@
 defmodule Atrium do
-  @mxAPIKEY "2f86c113535c59e19ccf5022e2fdfc284541fdba"
-  @mxCLIENTID "8981eb0a-84c6-49d9-930a-c343e6cff7df"
+  @mxAPIKEY "YOUR_MX_API_KEY"
+  @mxCLIENTID "YOUR_MX_CLIENT_ID"
   @environment "https://vestibule.mx.com"
 
   # USER
