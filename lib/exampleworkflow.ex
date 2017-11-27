@@ -5,11 +5,10 @@ defmodule ExampleWorkflow do
     IO.puts("\n2 second delay...")
     :timer.sleep(2000)
 
-    aggregationResponse = AtriumClient.readMemberAggregationStatus(userGUID, memberGUID)
+    member = Atrium.readMemberAggregationStatus(userGUID, memberGUID)
 
 
-    {:ok, parsedJSON} = Poison.decode(to_string(aggregationResponse))
-    code = parsedJSON["member"]["status"]
+    code = member["status"]
 
     IO.puts "\nJOB STATUS: " <> code
 
@@ -19,9 +18,8 @@ defmodule ExampleWorkflow do
       if (code == "HALTED") or (code == "FAILED") or (code == "ERRORED") do
         currentTime = String.slice(to_string(DateTime.utc_now() |> DateTime.to_iso8601()), 0..-9) <> "+00:00"
 
-        statusResponse = AtriumClient.readMemberAggregationStatus(userGUID, memberGUID)
-        {:ok, parsedJSON} = Poison.decode(to_string(statusResponse))
-        lastSuccessTime = parsedJSON["member"]["successfully_aggregated_at"]
+        member = Atrium.readMemberAggregationStatus(userGUID, memberGUID)
+        lastSuccessTime = member["successfully_aggregated_at"]
 
         # Check if last successful aggregation over 3 days aggregation
         if (lastSuccessTime != nil) and (abs(String.slice(currentTime, 8..9) - String.slice(lastSuccessTime, 8..9)) > 3 or abs(String.slice(currentTime, 5..6) - String.slice(lastSuccessTime, 5..6)) > 0 or abs(String.slice(currentTime, 0..3) - String.slice(lastSuccessTime, 0..3)) > 0) do
@@ -34,58 +32,42 @@ defmodule ExampleWorkflow do
           checkJobStatus(userGUID, memberGUID, counter)
         else
           if (code == "PREVENTED") or (code == "DENIED") or (code == "IMPAIRED") do
-            readMemberData = AtriumClient.readMember(userGUID, memberGUID)
-            {:ok, parsedJSON} = Poison.decode(to_string(readMemberData))
-            institutionCode = parsedJSON["member"]["institution_code"]
+            member = Atrium.readMember(userGUID, memberGUID)
+            institutionCode = member["institution_code"]
 
             IO.puts "\nPlease update credentials"
-            requiredCredentials = AtriumClient.readInstitutionCredentials(institutionCode, "", "")
+            credentials = Atrium.readInstitutionCredentials(institutionCode)
 
-            {:ok, parsedJSON} = Poison.decode(to_string(requiredCredentials))
-
-
-            {:ok, credentials} = Agent.start_link fn -> [] end
-            Enum.each(parsedJSON["credentials"], fn item ->
-              cred = String.trim(IO.gets("\nPlease enter in " <> to_string(item["label"]) <> ": "))
-              Agent.update(credentials, fn list -> [%{guid: item["guid"], value: cred} | list] end)
+            {:ok, updatedCredentials} = Agent.start_link fn -> [] end
+            Enum.each(credentials, fn credential ->
+              cred = String.trim(IO.gets("\nPlease enter in " <> to_string(credential["label"]) <> ": "))
+              Agent.update(updatedCredentials, fn list -> [%{guid: credential["guid"], value: cred} | list] end)
             end)
 
-            creds = Agent.get(credentials, fn list -> list end)
+            creds = Agent.get(updatedCredentials, fn list -> list end)
 
-            AtriumClient.updateMember(userGUID, memberGUID, creds, "", "")
+            Atrium.updateMember(userGUID, memberGUID, credentials: creds)
 
             checkJobStatus(userGUID, memberGUID, counter)
           else
             if code == "CHALLENGED" do
               IO.puts "\nPlease answer the following challenges: "
-              challengeResponse = AtriumClient.listMemberMFAChallenges(userGUID, memberGUID, "", "")
-              {:ok, parsedJSON} = Poison.decode(to_string(challengeResponse))
+              challenges = Atrium.listMemberMFAChallenges(userGUID, memberGUID)
 
-              # {:ok, answer} = Agent.start_link fn -> [] end
-              # Agent.update(answer, fn list -> ["]}}" | list] end)
-              # Enum.each(parsedJSON["challenges"], fn item ->
-              #   cred = String.trim(IO.gets(to_string(item["label"]) <> ": "))
-              #   Agent.update(answer, fn list -> [",{\"guid\":\"" <> item["guid"] <> "\",\"value\":\"" <> cred <> "\"}" | list] end)
-              # end)
-              # ans = String.slice(to_string(Agent.get(answer, fn list -> list end)), 1..-1)
-              # ans = "{\"member\":{\"challenges\":[" <> ans
-
-              #
               {:ok, answer} = Agent.start_link fn -> [] end
-              Enum.each(parsedJSON["challenges"], fn item ->
-                cred = String.trim(IO.gets("\nPlease enter in " <> to_string(item["label"]) <> ": "))
-                Agent.update(answer, fn list -> [%{guid: item["guid"], value: cred} | list] end)
+              Enum.each(challenges, fn challenge ->
+                cred = String.trim(IO.gets("\n" <> to_string(challenge["label"]) <> ": "))
+                Agent.update(answer, fn list -> [%{guid: challenge["guid"], value: cred} | list] end)
               end)
 
               creds = Agent.get(answer, fn list -> list end)
-              #
 
-              AtriumClient.resumeMemberAggregation(userGUID, memberGUID, creds)
+              Atrium.resumeMemberAggregation(userGUID, memberGUID, creds)
 
               checkJobStatus(userGUID, memberGUID, counter)
             else
               if code == "REJECTED" do
-                AtriumClient.aggregateMember(userGUID, memberGUID)
+                Atrium.aggregateMember(userGUID, memberGUID)
 
                 checkJobStatus(userGUID, memberGUID, counter)
               else
@@ -130,20 +112,18 @@ defmodule ExampleWorkflow do
   end
 
   def readAggregationData(userGUID, memberGUID) do
-    AtriumClient.readMember(userGUID, memberGUID)
+    Atrium.readMember(userGUID, memberGUID)
 
-    IO.puts "\n* Listing All Member Accounts *"
-    accountsResponse = AtriumClient.listMemberAccounts(userGUID, memberGUID, "", "")
-    {:ok, parsedJSON} = Poison.decode(to_string(accountsResponse))
-    Enum.each(parsedJSON["accounts"], fn item ->
-      IO.puts "Type: " <> to_string(item["type"]) <> "\tName: " <> to_string(item["name"]) <> "\tAvailable Balance: " <> to_string(item["available_balance"]) <> "\tAvailable Credit: " <> to_string(item["available_credit"])
-    end)
+    IO.puts "\n* Listing all member accounts and transactions *"
+    accounts = Atrium.listMemberAccounts(userGUID, memberGUID)
 
-    IO.puts "\n* Listing All Member Transactions *"
-    transactionsResponse = AtriumClient.listMemberTransactions(userGUID, memberGUID, "", "", "", "")
-    {:ok, parsedJSON} = Poison.decode(to_string(transactionsResponse))
-    Enum.each(parsedJSON["transactions"], fn item ->
-      IO.puts "Date: " <> to_string(item["date"]) <> "\tDescription: " <> to_string(item["description"]) <> "\tAmount: " <> to_string(item["amount"])
+    Enum.each(accounts, fn account ->
+      IO.puts "Type: " <> to_string(account["type"]) <> "\tName: " <> to_string(account["name"]) <> "\tAvailable Balance: " <> to_string(account["available_balance"]) <> "\tAvailable Credit: " <> to_string(account["available_credit"])
+      IO.puts "Transactions"
+      transactions = Atrium.listAccountTransactions(userGUID, account["guid"])
+      Enum.each(transactions, fn transaction ->
+        IO.puts "Date: " <> to_string(transaction["date"]) <> "\tDescription: " <> to_string(transaction["description"]) <> "\tAmount: " <> to_string(transaction["amount"])
+      end)
     end)
   end
 
@@ -162,54 +142,50 @@ defmodule ExampleWorkflow do
     end
 
     userGUID = if (userGUID == "") and (endUserPresent == "true") do
-      IO.puts "\n* NEW USER CREATION *"
+      IO.puts "\n* Creating user *"
 
-      identifier = String.trim(IO.gets("\nPlease enter in an unique id: "))
+      identifier = String.trim(IO.gets("\nPlease enter in an unique id for user: "))
 
-      userResponse = AtriumClient.createUser(identifier, "", "")
-
-      {:ok, parsedJSON} = Poison.decode(to_string(userResponse))
-      to_string(parsedJSON["user"]["guid"])
+      user = Atrium.createUser(identifier: identifier)
+      IO.puts "\nCreated user: " <> user["guid"]
+      user["guid"]
     else
       userGUID
     end
 
     if (memberGUID != "") and (endUserPresent == "true") do
-      AtriumClient.aggregateMember(userGUID, memberGUID)
+      Atrium.aggregateMember(userGUID, memberGUID)
       checkJobStatus(userGUID, memberGUID, counter)
     else
       if memberGUID != "" do
         readAggregationData(userGUID, memberGUID)
       else
         if endUserPresent == "true" do
-          IO.puts "\n* NEW MEMBER CREATION *"
+          IO.puts "\n* Creating new member *"
 
-          institution = String.trim(IO.gets("Please enter in a keyword to search for an institution: "))
-          institutions = AtriumClient.listInstitutions(institution, "", "")
+          institutions = Atrium.listInstitutions()
 
-          {:ok, parsedJSON} = Poison.decode(to_string(institutions))
-          Enum.each(parsedJSON["institutions"], fn item ->
-            IO.puts to_string(item["name"]) <> " : institution code = " <> to_string(item["code"])
+          IO.puts "\n* Listing top 15 institutions *"
+          Enum.each(institutions, fn institution ->
+            IO.puts to_string(institution["name"]) <> " : institution code = " <> to_string(institution["code"])
           end)
 
           institutionCode = String.trim(IO.gets("\nPlease enter in desired institution code: "))
 
-          requiredCredentials = AtriumClient.readInstitutionCredentials(institutionCode, "", "")
+          credentials = Atrium.readInstitutionCredentials(institutionCode)
 
-          {:ok, parsedJSON} = Poison.decode(to_string(requiredCredentials))
-
-          {:ok, credentials} = Agent.start_link fn -> [] end
-          Enum.each(parsedJSON["credentials"], fn item ->
-            cred = String.trim(IO.gets("\nPlease enter in " <> to_string(item["label"]) <> ": "))
-            Agent.update(credentials, fn list -> [%{guid: item["guid"], value: cred} | list] end)
+          {:ok, updatedCredentials} = Agent.start_link fn -> [] end
+          Enum.each(credentials, fn credential ->
+            cred = String.trim(IO.gets("\nPlease enter in " <> to_string(credential["label"]) <> ": "))
+            Agent.update(updatedCredentials, fn list -> [%{guid: credential["guid"], value: cred} | list] end)
           end)
 
-          creds = Agent.get(credentials, fn list -> list end)
+          creds = Agent.get(updatedCredentials, fn list -> list end)
 
-          memberResponse = AtriumClient.createMember(userGUID, creds, institutionCode, "", "")
+          member = Atrium.createMember(userGUID, creds, institutionCode)
 
-          {:ok, parsedJSON} = Poison.decode(to_string(memberResponse))
-          memberGUID = to_string(parsedJSON["member"]["guid"])
+          memberGUID = member["guid"]
+          IO.puts "\nCreated member: " <> memberGUID
           checkJobStatus(userGUID, memberGUID, counter)
         else
           IO.puts "\nEnd user must be present to create a new member"
@@ -217,5 +193,8 @@ defmodule ExampleWorkflow do
         end
       end
     end
+    IO.puts "\n* Deleting test user *"
+    Atrium.deleteUser(userGUID)
+    IO.puts "Deleted user: " <> userGUID
   end
 end
