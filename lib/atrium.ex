@@ -1,10 +1,9 @@
 defmodule Atrium do
-  @mxAPIKEY "YOUR_MX_API_KEY"
-  @mxCLIENTID "YOUR_MX_CLIENT_ID"
-  @environment "https://vestibule.mx.com"
+  def api_key, do: Application.get_env(:atrium, :api_key, "")
 
-  # USER
+  def client_id, do: Application.get_env(:atrium, :client_id, "")
 
+  def environment, do: Application.get_env(:atrium, :environment, "https://vestibule.mx.com")
 
   # Required Parameters: None
   # Optional Parameters: identifier, is_disabled, metadata
@@ -346,8 +345,8 @@ defmodule Atrium do
   # Optional Parameters: None
   defp makeRequest(mode, endpoint, body) do
     Application.get_env(:atrium_ex, :api_key)
-    url = @environment <> endpoint
-    headers = [{ "Accept", "application/vnd.mx.atrium.v1<>json"}, {"Content-Type", "application/json"}, {"MX-API-Key", @mxAPIKEY }, {"MX-Client-ID", @mxCLIENTID }]
+    url = environment() <> endpoint
+    headers = [{ "Accept", "application/vnd.mx.atrium.v1<>json"}, {"Content-Type", "application/json"}, {"MX-API-Key", api_key() }, {"MX-Client-ID", client_id() }]
 
     if (mode == "GET") do
       case HTTPoison.get(url, headers, [timeout: 50_000, recv_timeout: 50_000]) do
