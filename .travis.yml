@@ -1,5 +1,5 @@
 language: elixir
-otp_releases:
+otp_release:
  - 19.2
  - 20.1
 elixir:
