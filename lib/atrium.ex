@@ -3,7 +3,7 @@ defmodule Atrium do
 
   def client_id, do: Application.get_env(:atrium, :client_id, "")
 
-  def environment, do: Application.get_env(:atrium, :environment, "https://vestibule.mx.com")
+  def base_url, do: Application.get_env(:atrium, :base_url, "https://vestibule.mx.com")
 
   # Required Parameters: None
   # Optional Parameters: identifier, is_disabled, metadata
@@ -345,7 +345,7 @@ defmodule Atrium do
   # Optional Parameters: None
   defp makeRequest(mode, endpoint, body) do
     Application.get_env(:atrium_ex, :api_key)
-    url = environment() <> endpoint
+    url = base_url() <> endpoint
     headers = [{ "Accept", "application/vnd.mx.atrium.v1<>json"}, {"Content-Type", "application/json"}, {"MX-API-Key", api_key() }, {"MX-Client-ID", client_id() }]
 
     if (mode == "GET") do

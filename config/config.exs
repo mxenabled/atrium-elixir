@@ -4,4 +4,4 @@ use Mix.Config
 
 config :atrium, api_key: "TEST_API_KEY",
                 client_id: "TEST_CLIENT_ID",
-                environment: "http://localhost:5000"
+                base_url: "http://localhost:5000"
