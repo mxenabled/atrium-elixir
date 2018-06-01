@@ -7,395 +7,355 @@ defmodule Atrium do
 
   # Required Parameters: None
   # Optional Parameters: identifier, is_disabled, metadata
-  def createUser(options \\ []) do
-    defaults = [identifier: nil, is_disabled: nil, metadata: nil]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{identifier: identifier, is_disabled: is_disabled, metadata: metadata} = options
+  def create_user(options \\ []) do
+    body = Poison.encode!(%{user: Enum.into(options, %{})})
 
-    data = %{user: %{identifier: identifier, is_disabled: is_disabled, metadata: metadata}}
-    body = Poison.encode!(data)
-
-    response = makeRequest("POST", "/users", body)
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["user"]
+    response = make_request("POST", "/users", body)
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["user"]
   end
 
-  # Required Parameters: userGUID
+  # Required Parameters: user_guid
   # Optional Parameters: None
-  def readUser(userGUID) do
-    response = makeRequest("GET", "/users/" <> userGUID, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["user"]
+  def read_user(user_guid) do
+    response = make_request("GET", "/users/" <> user_guid, "")
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["user"]
   end
 
   # Required Parameters: None
-  # Optional Parameters: userGUID, identifier, is_disabled, metadata
-  def updateUser(userGUID, options \\ []) do
-    defaults = [identifier: nil, is_disabled: nil, metadata: nil]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{identifier: identifier, is_disabled: is_disabled, metadata: metadata} = options
+  # Optional Parameters: user_guid, identifier, is_disabled, metadata
+  def update_user(user_guid, options \\ []) do
+    body = Poison.encode!(%{user: Enum.into(options, %{})})
 
-    data = %{user: %{identifier: identifier, is_disabled: is_disabled, metadata: metadata}}
-    body = Poison.encode!(data)
-
-    response = makeRequest("PUT", "/users/" <> userGUID, body)
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["user"]
+    response = make_request("PUT", "/users/" <> user_guid, body)
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["user"]
   end
 
   # Required Parameters: None
   # Optional Parameters: page, records_per_page
-  def listUsers(options \\ []) do
-    defaults = [page: "", records_per_page: ""]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{page: page, records_per_page: records_per_page} = options
+  def list_users(options \\ []) do
+    params = optional_parameters(options)
 
-    params = optionalParameters("", "", "", page, records_per_page)
-
-    response = makeRequest("GET", "/users" <> params, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["users"]
+    response = make_request("GET", "/users" <> params, "")
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["users"]
   end
 
-  def deleteUser(userGUID) do
-    makeRequest("DELETE", "/users/" <> userGUID, "")
+  def delete_user(user_guid) do
+    make_request("DELETE", "/users/" <> user_guid, "")
   end
-
 
   # INSTITUTION
 
-
   # Required Parameters: None
   # Optional Parameters: name, page, records_per_page
-  def listInstitutions(options \\ []) do
-    defaults = [name: "", page: "", records_per_page: ""]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{name: name, page: page, records_per_page: records_per_page} = options
+  def list_institutions(options \\ []) do
+    params = optional_parameters(options)
 
-    params = optionalParameters(name, "", "", page, records_per_page)
-
-    response = makeRequest("GET", "/institutions" <> params, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["institutions"]
+    response = make_request("GET", "/institutions" <> params, "")
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["institutions"]
   end
 
-  # Required Parameters: institutionCode
+  # Required Parameters: institution_code
   # Optional Parameters: None
-  def readInstitution(institutionCode) do
-    response = makeRequest("GET", "/institutions/" <> institutionCode, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["institution"]
+  def read_institution(institution_code) do
+    response = make_request("GET", "/institutions/" <> institution_code, "")
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["institution"]
   end
 
-  # Required Parameters: institutionCode
+  # Required Parameters: institution_code
   # Optional Parameters: page, records_per_page
-  def readInstitutionCredentials(institutionCode, options \\ []) do
-    defaults = [page: "", records_per_page: ""]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{page: page, records_per_page: records_per_page} = options
+  def read_institution_credentials(institution_code, options \\ []) do
+    params = optional_parameters(options)
 
-    params = optionalParameters("", "", "", page, records_per_page)
+    response =
+      make_request("GET", "/institutions/" <> institution_code <> "/credentials" <> params, "")
 
-    response = makeRequest("GET", "/institutions/" <> institutionCode <> "/credentials" <> params, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["credentials"]
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["credentials"]
   end
-
 
   # MEMBER
 
-
-  # Required Parameters: userGUID, credentials, institutionCode
+  # Required Parameters: user_guid, credentials, institution_code
   # Optional Parameters: identifier, metadata
-  def createMember(userGUID, credentials, institutionCode, options \\ []) do
-    defaults = [identifier: nil, metadata: nil]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{identifier: identifier, metadata: metadata} = options
+  def create_member(user_guid, credentials, institution_code, options \\ []) do
+    data =
+      options
+      |> Enum.filter(fn {_k, v} -> not is_nil(v) end)
+      |> Enum.into(%{})
+      |> Map.put(:insitution_code, institution_code)
+      |> Map.put(:credentials, credentials)
 
-    data = cond do
-      (identifier != nil) and (metadata != nil) -> %{member: %{institution_code: institutionCode, credentials: credentials, identifier: identifier, metadata: metadata}}
-      (identifier == nil) and (metadata != nil) -> %{member: %{institution_code: institutionCode, credentials: credentials, metadata: metadata}}
-      (identifier != nil) and (metadata == nil) -> %{member: %{institution_code: institutionCode, credentials: credentials, identifier: identifier}}
-      (identifier == nil) and (metadata == nil) -> %{member: %{institution_code: institutionCode, credentials: credentials}}
-      true -> IO.puts "Error while creating member."
-    end
+    body = Poison.encode!(%{member: data})
 
-    body = Poison.encode!(data)
-
-    response = makeRequest("POST", "/users/" <> userGUID <> "/members", body)
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["member"]
+    response = make_request("POST", "/users/" <> user_guid <> "/members", body)
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["member"]
   end
 
-  # Required Parameters: userGUID, memberGUID
+  # Required Parameters: user_guid, member_guid
   # Optional Parameters: None
-  def readMember(userGUID, memberGUID) do
-    response = makeRequest("GET", "/users/" <> userGUID <> "/members/" <> memberGUID, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["member"]
+  def read_member(user_guid, member_guid) do
+    response = make_request("GET", "/users/" <> user_guid <> "/members/" <> member_guid, "")
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["member"]
   end
 
-  # Required Parameters: userGUID, memberGUID
+  # Required Parameters: user_guid, member_guid
   # Optional Parameters: credentials, identifier, metadata
-  def updateMember(userGUID, memberGUID, options \\ []) do
-    defaults = [credentials: nil, identifier: nil, metadata: nil]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{credentials: credentials, identifier: identifier, metadata: metadata} = options
+  def update_member(user_guid, member_guid, options \\ []) do
+    data =
+      options
+      |> Enum.filter(fn {_k, v} -> not is_nil(v) end)
+      |> Enum.into(%{})
 
-    data = cond do
-      (credentials != nil) and (identifier != nil) and (metadata != nil) -> %{member: %{credentials: credentials, identifier: identifier, metadata: metadata}}
-      (credentials != nil) and (identifier == nil) and (metadata != nil) -> %{member: %{credentials: credentials, metadata: metadata}}
-      (credentials != nil) and (identifier != nil) and (metadata == nil) -> %{member: %{credentials: credentials, identifier: identifier}}
-      (credentials == nil) and (identifier != nil) and (metadata != nil) -> %{member: %{identifier: identifier, metadata: metadata}}
-      (credentials != nil) and (identifier == nil) and (metadata == nil) -> %{member: %{credentials: credentials}}
-      (credentials == nil) and (identifier != nil) and (metadata == nil) -> %{member: %{identifier: identifier}}
-      (credentials == nil) and (identifier == nil) and (metadata != nil) -> %{member: %{metadata: metadata}}
-      true -> IO.puts "Error while updating member."
-    end
+    body = Poison.encode!(%{member: data})
 
-    body = Poison.encode!(data)
-
-    response = makeRequest("PUT", "/users/" <> userGUID <> "/members/" <> memberGUID, body)
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["member"]
+    response = make_request("PUT", "/users/" <> user_guid <> "/members/" <> member_guid, body)
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["member"]
   end
 
-  # Required Parameters: userGUID, memberGUID
+  # Required Parameters: user_guid, member_guid
   # Optional Parameters: None
-  def deleteMember(userGUID, memberGUID) do
-    makeRequest("DELETE", "/users/" <> userGUID <> "/members/" <> memberGUID, "")
+  def delete_member(user_guid, member_guid) do
+    make_request("DELETE", "/users/" <> user_guid <> "/members/" <> member_guid, "")
   end
 
-  # Required Parameters: userGUID
+  # Required Parameters: user_guid
   # Optional Parameters: page, records_per_page
-  def listMembers(userGUID, options \\ []) do
-    defaults = [page: "", records_per_page: ""]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{page: page, records_per_page: records_per_page} = options
+  def list_members(user_guid, options \\ []) do
+    params = optional_parameters(options)
 
-    params = optionalParameters("", "", "", page, records_per_page)
-
-    response = makeRequest("GET", "/users/" <> userGUID <> "/members" <> params, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["members"]
+    response = make_request("GET", "/users/" <> user_guid <> "/members" <> params, "")
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["members"]
   end
 
-  # Required Parameters: userGUID, memberGUID
+  # Required Parameters: user_guid, member_guid
   # Optional Parameters: None
-  def aggregateMember(userGUID, memberGUID) do
-    response = makeRequest("POST", "/users/" <> userGUID <> "/members/" <> memberGUID <> "/aggregate", "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["member"]
+  def aggregate_member(user_guid, member_guid) do
+    response =
+      make_request(
+        "POST",
+        "/users/" <> user_guid <> "/members/" <> member_guid <> "/aggregate",
+        ""
+      )
+
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["member"]
   end
 
-  # Required Parameters:  userGUID, memberGUID
+  # Required Parameters:  user_guid, member_guid
   # Optional Parameters: None
-  def readMemberAggregationStatus(userGUID, memberGUID) do
-    response = makeRequest("GET", "/users/" <> userGUID <> "/members/" <> memberGUID <> "/status", "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["member"]
+  def read_member_aggregation_status(user_guid, member_guid) do
+    response =
+      make_request("GET", "/users/" <> user_guid <> "/members/" <> member_guid <> "/status", "")
+
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["member"]
   end
 
-  # Required Parameters: userGUID, memberGUID
+  # Required Parameters: user_guid, member_guid
   # Optional Parameters: page, records_per_page
-  def listMemberMFAChallenges(userGUID, memberGUID, options \\ []) do
-    defaults = [page: "", records_per_page: ""]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{page: page, records_per_page: records_per_page} = options
+  def list_member_mfa_challenges(user_guid, member_guid, options \\ []) do
+    params = optional_parameters(options)
 
-    params = optionalParameters("", "", "", page, records_per_page)
+    response =
+      make_request(
+        "GET",
+        "/users/" <> user_guid <> "/members/" <> member_guid <> "/challenges" <> params,
+        ""
+      )
 
-    response = makeRequest("GET", "/users/" <> userGUID <> "/members/" <> memberGUID <> "/challenges" <> params, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["challenges"]
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["challenges"]
   end
 
-  # Required Parameters: userGUID, memberGUID, answersMFA
+  # Required Parameters: user_guid, member_guid, answersMFA
   # Optional Parameters: None
-  def resumeMemberAggregation(userGUID, memberGUID, answers) do
+  def resume_member_aggregate(user_guid, member_guid, answers) do
     data = %{member: %{challenges: answers}}
     body = Poison.encode!(data)
 
-    response = makeRequest("PUT", "/users/" <> userGUID <> "/members/" <> memberGUID <> "/resume", body)
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["member"]
+    response =
+      make_request("PUT", "/users/" <> user_guid <> "/members/" <> member_guid <> "/resume", body)
+
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["member"]
   end
 
-  # Required Parameters: userGUID, memberGUID
+  # Required Parameters: user_guid, member_guid
   # Optional Parameters: page, records_per_page
-  def listMemberCredentials(userGUID, memberGUID, options \\ []) do
-    defaults = [page: "", records_per_page: ""]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{page: page, records_per_page: records_per_page} = options
+  def list_member_credentials(user_guid, member_guid, options \\ []) do
+    params = optional_parameters(options)
 
-    params = optionalParameters("", "", "", page, records_per_page)
+    response =
+      make_request(
+        "GET",
+        "/users/" <> user_guid <> "/members/" <> member_guid <> "/credentials" <> params,
+        ""
+      )
 
-    response = makeRequest("GET", "/users/" <> userGUID <> "/members/" <> memberGUID <> "/credentials" <> params, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["credentials"]
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["credentials"]
   end
 
-  # Required Parameters: userGUID, memberGUID
+  # Required Parameters: user_guid, member_guid
   # Optional Parameters: page, records_per_page
-  def listMemberAccounts(userGUID, memberGUID, options \\ []) do
-    defaults = [page: "", records_per_page: ""]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{page: page, records_per_page: records_per_page} = options
+  def list_member_accounts(user_guid, member_guid, options \\ []) do
+    params = optional_parameters(options)
 
-    params = optionalParameters("", "", "", page, records_per_page)
+    response =
+      make_request(
+        "GET",
+        "/users/" <> user_guid <> "/members/" <> member_guid <> "/accounts" <> params,
+        ""
+      )
 
-    response = makeRequest("GET", "/users/" <> userGUID <> "/members/" <> memberGUID <> "/accounts" <> params, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["accounts"]
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["accounts"]
   end
 
-  # Required Parameters: userGUID, memberGUID
+  # Required Parameters: user_guid, member_guid
   # Optional Parameters: from_date, to_date, page, records_per_page
-  def listMemberTransactions(userGUID, memberGUID, options \\ []) do
-    defaults = [from_date: "", to_date: "", page: "", records_per_page: ""]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{from_date: from_date, to_date: to_date, page: page, records_per_page: records_per_page} = options
+  def list_member_transactions(user_guid, member_guid, options \\ []) do
+    params = optional_parameters(options)
 
-    params = optionalParameters("", from_date, to_date, page, records_per_page)
+    response =
+      make_request(
+        "GET",
+        "/users/" <> user_guid <> "/members/" <> member_guid <> "/transactions" <> params,
+        ""
+      )
 
-    response = makeRequest("GET", "/users/" <> userGUID <> "/members/" <> memberGUID <> "/transactions" <> params, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["transactions"]
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["transactions"]
   end
-
 
   # ACCOUNT
 
-  # Required Parameters: userGUID, accountGUID
+  # Required Parameters: user_guid, account_guid
   # Optional Parameters: None
-  def readAccount(userGUID, accountGUID) do
-    response = makeRequest("GET", "/users/" <> userGUID <> "/accounts/" <> accountGUID, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["account"]
+  def read_account(user_guid, account_guid) do
+    response = make_request("GET", "/users/" <> user_guid <> "/accounts/" <> account_guid, "")
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["account"]
   end
 
-  # Required Parameters: userGUID
+  # Required Parameters: user_guid
   # Optional Parameters: page, records_per_page
-  def listAccounts(userGUID, options \\ []) do
-    defaults = [page: "", records_per_page: ""]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{page: page, records_per_page: records_per_page} = options
+  def list_accounts(user_guid, options \\ []) do
+    params = optional_parameters(options)
 
-    params = optionalParameters("", "", "", page, records_per_page)
-
-    response = makeRequest("GET", "/users/" <> userGUID <> "/accounts" <> params, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["accounts"]
+    response = make_request("GET", "/users/" <> user_guid <> "/accounts" <> params, "")
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["accounts"]
   end
 
-  # Required Parameters: userGUID, accountGUID
+  # Required Parameters: user_guid, account_guid
   # Optional Parameters: from_date, to_date, page, records_per_page
-  def listAccountTransactions(userGUID, accountGUID, options \\ []) do
-    defaults = [from_date: "", to_date: "", page: "", records_per_page: ""]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{from_date: from_date, to_date: to_date, page: page, records_per_page: records_per_page} = options
+  def list_account_transactions(user_guid, account_guid, options \\ []) do
+    params = optional_parameters(options)
 
-    params = optionalParameters("", from_date, to_date, page, records_per_page)
+    response =
+      make_request(
+        "GET",
+        "/users/" <> user_guid <> "/accounts/" <> account_guid <> "/transactions" <> params,
+        ""
+      )
 
-    response = makeRequest("GET", "/users/" <> userGUID <> "/accounts/" <> accountGUID <> "/transactions" <> params, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["transactions"]
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["transactions"]
   end
-
 
   # TRANSACTION
 
-  # Required Parameters: userGUID, transactionGUID
+  # Required Parameters: user_guid, transaction_guid
   # Optional Parameters: None
-  def readTransaction(userGUID, transactionGUID) do
-    response = makeRequest("GET", "/users/" <> userGUID <> "/transactions/" <> transactionGUID, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["transaction"]
+  def read_transaction(user_guid, transaction_guid) do
+    response =
+      make_request("GET", "/users/" <> user_guid <> "/transactions/" <> transaction_guid, "")
+
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["transaction"]
   end
 
-  # Required Parameters: userGUID
+  # Required Parameters: user_guid
   # Optional Parameters: from_date, to_date, page, records_per_page
-  def listTransactions(userGUID, options \\ []) do
-    defaults = [from_date: "", to_date: "", page: "", records_per_page: ""]
-    options = Keyword.merge(defaults, options) |> Enum.into(%{})
-    %{from_date: from_date, to_date: to_date, page: page, records_per_page: records_per_page} = options
+  def list_transactions(user_guid, options \\ []) do
+    params = optional_parameters(options)
 
-    params = optionalParameters("", from_date, to_date, page, records_per_page)
-
-    response = makeRequest("GET", "/users/" <> userGUID <> "/transactions" <> params, "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["transactions"]
+    response = make_request("GET", "/users/" <> user_guid <> "/transactions" <> params, "")
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["transactions"]
   end
-
 
   # CONNECT WIDGET
 
-  # Required Parameters: userGUID
+  # Required Parameters: user_guid
   # Optional Parameters: None
-  def createWidget(userGUID) do
-    response = makeRequest("POST", "/users/" <> userGUID <> "/connect_widget_url", "")
-    {:ok, parsedJSON} = Poison.decode(to_string(response))
-    parsedJSON["user"]
+  def create_widget(user_guid) do
+    response = make_request("POST", "/users/" <> user_guid <> "/connect_widget_url", "")
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["user"]
   end
-
 
   # CLIENT
 
   # Required Parameters: mode, endpoint, body
   # Optional Parameters: None
-  defp makeRequest(mode, endpoint, body) do
+  defp make_request(mode, endpoint, body) do
     Application.get_env(:atrium_ex, :api_key)
     url = base_url() <> endpoint
-    headers = [{ "Accept", "application/vnd.mx.atrium.v1<>json"}, {"Content-Type", "application/json"}, {"MX-API-Key", api_key() }, {"MX-Client-ID", client_id() }]
 
-    if (mode == "GET") do
-      case HTTPoison.get(url, headers, [timeout: 50_000, recv_timeout: 50_000]) do
-        {:ok, %HTTPoison.Response{status_code: code, body: body}} -> httpError(code, body)
-        other -> other
-      end
-    else
-      if (mode == "POST") do
-        case HTTPoison.post(url, body, headers, [timeout: 50_000, recv_timeout: 50_000]) do
-          {:ok, %HTTPoison.Response{status_code: code, body: body}} -> httpError(code, body)
-          other -> other
-        end
-      else
-        if (mode == "PUT") do
-          case HTTPoison.put(url, body, headers, [timeout: 50_000, recv_timeout: 50_000]) do
-            {:ok, %HTTPoison.Response{status_code: code, body: body}} -> httpError(code, body)
-            other -> other
-          end
-        else
-          if (mode == "DELETE") do
-            case HTTPoison.delete(url, headers, [timeout: 50_000, recv_timeout: 50_000]) do
-              {:ok, %HTTPoison.Response{status_code: code, body: body}} -> httpError(code, body)
-              other -> other
-            end
-          end
-        end
-      end
+    headers = [
+      {"Accept", "application/vnd.mx.atrium.v1<>json"},
+      {"Content-Type", "application/json"},
+      {"MX-API-Key", api_key()},
+      {"MX-Client-ID", client_id()}
+    ]
+
+    make_request(mode, url, body, headers)
+  end
+
+  defp make_request("GET", url, _body, headers) do
+    case HTTPoison.get(url, headers, timeout: 50_000, recv_timeout: 50_000) do
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} -> http_error(code, body)
+      other -> other
     end
   end
 
-  # Print and exit on http error
-  defp httpError(status_code, body) do
-    case {status_code} do
-      {400} -> IO.puts(to_string(status_code) <> " error: Required parameter is missing.")
-      {401} -> IO.puts(to_string(status_code) <> " error: Invalid MX-API-Key, MX-Client-ID, or being used in wrong environment.")
-      {403} -> IO.puts(to_string(status_code) <> " error: Requests must be HTTPS.")
-      {404} -> IO.puts(to_string(status_code) <> " error: GUID / URL path not recognized.")
-      {405} -> IO.puts(to_string(status_code) <> " error: Endpoint constraint not met.")
-      {406} -> IO.puts(to_string(status_code) <> " error: Specifiy valid API version.")
-      {409} -> IO.puts(to_string(status_code) <> " error: Object already exists.")
-      {422} -> IO.puts(to_string(status_code) <> " error: Data provided cannot be processed.")
-      {500} -> IO.puts(to_string(status_code) <> " error: An unexpected error occurred on MX's systems.")
-      {502} -> IO.puts(to_string(status_code) <> " error: An unexpected error occurred on MX's systems.")
-      {504} -> IO.puts(to_string(status_code) <> " error: An unexpected error occurred on MX's systems.")
-      {503} -> IO.puts(to_string(status_code) <> " error: Please try again later. The MX Platform is currently being updated.")
-      {_} -> body
+  defp make_request("POST", url, body, headers) do
+    case HTTPoison.post(url, body, headers, timeout: 50_000, recv_timeout: 50_000) do
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} -> http_error(code, body)
+      other -> other
     end
+  end
 
-    if (div(status_code, 100) == 4 ) or (div(status_code, 100) == 5) do
+  defp make_request("PUT", url, body, headers) do
+    case HTTPoison.put(url, body, headers, timeout: 50_000, recv_timeout: 50_000) do
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} -> http_error(code, body)
+      other -> other
+    end
+  end
+
+  defp make_request("DELETE", url, _body, headers) do
+    case HTTPoison.delete(url, headers, timeout: 50_000, recv_timeout: 50_000) do
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} -> http_error(code, body)
+      other -> other
+    end
+  end
+
+  defp http_error(status_code, body) do
+    print_error(status_code)
+
+    if div(status_code, 100) == 4 or div(status_code, 100) == 5 do
       System.halt(0)
     end
 
@@ -403,33 +363,25 @@ defmodule Atrium do
     body
   end
 
-  defp optionalParameters(name, from_date, to_date, page, records_per_page) do
-    params = "?"
-    params = if (name != "") do
-      params <> "name=" <> name <> "&"
-    else
-      params
-    end
-    params = if (from_date != "") do
-      params <> "from_date=" <> from_date <> "&"
-    else
-      params
-    end
-    params = if (to_date != "") do
-      params <> "to_date=" <> to_date <> "&"
-    else
-      params
-    end
-    params = if (page != "") do
-      params <> "page=" <> page <> "&"
-    else
-      params
-    end
-    params = if (records_per_page != "") do
-      params <> "records_per_page=" <> records_per_page <> "&"
-    else
-      params
-    end
-    String.slice(params, 0..-2)
+  # Print on http error
+  defp print_error(400), do: IO.puts("400 error: Required parameter is missing.")
+  defp print_error(401), do: IO.puts("401 error: Invalid MX-API-Key, MX-Client-ID, or being used in wrong environment.")
+  defp print_error(403), do: IO.puts("403 error: Requests must be HTTPS.")
+  defp print_error(404), do: IO.puts("404 error: GUID / URL path not recognized.")
+  defp print_error(405), do: IO.puts("405 error: Endpoint constraint not met.")
+  defp print_error(406), do: IO.puts("406 error: Specifiy valid API version.")
+  defp print_error(409), do: IO.puts("409 error: Object already exists.")
+  defp print_error(422), do: IO.puts("422 error: Data provided cannot be processed.")
+  defp print_error(status_code) when status_code in [500, 502, 504], do: IO.puts("#{status_code} error: An unexpected error occurred on MX's systems.")
+  defp print_error(503), do: IO.puts("503 error: Please try again later. The MX Platform is currently being updated.")
+  defp print_error(_status_code), do: nil
+
+  defp optional_parameters(opts) do
+    opts
+    |> Enum.filter(fn {k, v} ->
+      not is_nil(v) and v != "" and k in [:name, :from_date, :to_date, :page, :records_per_page]
+    end)
+    |> Enum.reduce("?", fn {k, v}, acc -> "#{acc}#{k}=#{v}&" end)
+    |> String.slice(0..-2)
   end
 end
