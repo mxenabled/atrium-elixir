@@ -1,20 +1,20 @@
 defmodule ExampleWorkflow do
-  def checkJobStatus(userGUID, memberGUID, counter) do
+  def checkJobStatus(user_guid, member_guid, counter) do
     IO.puts("\n2 second delay...")
     :timer.sleep(2000)
 
-    member = Atrium.readMemberAggregationStatus(userGUID, memberGUID)
+    member = Atrium.read_member_aggregation_status(user_guid, member_guid)
     code = member["status"]
 
     IO.puts "\nJOB STATUS: " <> code
 
     if code == "COMPLETED" do
-      readAggregationData(userGUID, memberGUID)
+      readAggregationData(user_guid, member_guid)
     else
       if (code == "HALTED") or (code == "FAILED") or (code == "ERRORED") do
         currentTime = String.slice(to_string(DateTime.utc_now() |> DateTime.to_iso8601()), 0..-9) <> "+00:00"
 
-        member = Atrium.readMemberAggregationStatus(userGUID, memberGUID)
+        member = Atrium.read_member_aggregation_status(user_guid, member_guid)
         lastSuccessTime = member["successfully_aggregated_at"]
 
         # Check if last successful aggregation over 3 days aggregation
@@ -25,14 +25,14 @@ defmodule ExampleWorkflow do
         end
       else
         if (code == "CREATED") or (code == "UPDATED") or (code == "RESUMED") or (code == "CONNECTED") or (code == "DEGRADED") or (code == "DELAYED") or (code == "INITIATED") or (code == "REQUESTED") or (code == "AUTHENTICATED") or (code == "RECEIVED") or (code == "TRANSFERRED") do
-          checkJobStatus(userGUID, memberGUID, counter)
+          checkJobStatus(user_guid, member_guid, counter)
         else
           if (code == "PREVENTED") or (code == "DENIED") or (code == "IMPAIRED") do
-            member = Atrium.readMember(userGUID, memberGUID)
-            institutionCode = member["institution_code"]
+            member = Atrium.read_member(user_guid, member_guid)
+            institution_code = member["institution_code"]
 
             IO.puts "\nPlease update credentials"
-            credentials = Atrium.readInstitutionCredentials(institutionCode)
+            credentials = Atrium.read_institution_credentials(institution_code)
 
             {:ok, updatedCredentials} = Agent.start_link fn -> [] end
             Enum.each(credentials, fn credential ->
@@ -42,13 +42,13 @@ defmodule ExampleWorkflow do
 
             creds = Agent.get(updatedCredentials, fn list -> list end)
 
-            Atrium.updateMember(userGUID, memberGUID, credentials: creds)
+            Atrium.update_member(user_guid, member_guid, credentials: creds)
 
-            checkJobStatus(userGUID, memberGUID, counter)
+            checkJobStatus(user_guid, member_guid, counter)
           else
             if code == "CHALLENGED" do
               IO.puts "\nPlease answer the following challenges: "
-              challenges = Atrium.listMemberMFAChallenges(userGUID, memberGUID)
+              challenges = Atrium.list_member_mfa_challenges(user_guid, member_guid)
 
               {:ok, answer} = Agent.start_link fn -> [] end
               Enum.each(challenges, fn challenge ->
@@ -58,14 +58,14 @@ defmodule ExampleWorkflow do
 
               creds = Agent.get(answer, fn list -> list end)
 
-              Atrium.resumeMemberAggregation(userGUID, memberGUID, creds)
+              Atrium.resume_member_aggregate(user_guid, member_guid, creds)
 
-              checkJobStatus(userGUID, memberGUID, counter)
+              checkJobStatus(user_guid, member_guid, counter)
             else
               if code == "REJECTED" do
-                Atrium.aggregateMember(userGUID, memberGUID)
+                Atrium.aggregate_member(user_guid, member_guid)
 
-                checkJobStatus(userGUID, memberGUID, counter)
+                checkJobStatus(user_guid, member_guid, counter)
               else
                 if code == "EXPIRED" do
                   IO.puts "\nUser did not answer MFA in time. Please try again tomorrow."
@@ -86,7 +86,7 @@ defmodule ExampleWorkflow do
                             # Check JobStatus() an additional 2 times to see if status changed
                             if Agent.get(counter, fn x -> x end) < 3 do
                               Agent.update(counter, fn x -> x + 1 end)
-                              checkJobStatus(userGUID, memberGUID, counter)
+                              checkJobStatus(user_guid, member_guid, counter)
                             else
                               IO.puts "\nAn update is currently unavailable. Please try again tomorrow and contact support if unsuccessful after 3 days."
                               Agent.update(counter, fn x -> x - 3 end)
@@ -107,16 +107,16 @@ defmodule ExampleWorkflow do
     end
   end
 
-  def readAggregationData(userGUID, memberGUID) do
-    Atrium.readMember(userGUID, memberGUID)
+  def readAggregationData(user_guid, member_guid) do
+    Atrium.read_member(user_guid, member_guid)
 
     IO.puts "\n* Listing all member accounts and transactions *"
-    accounts = Atrium.listMemberAccounts(userGUID, memberGUID)
+    accounts = Atrium.list_member_accounts(user_guid, member_guid)
 
     Enum.each(accounts, fn account ->
       IO.puts "Type: " <> to_string(account["type"]) <> "\tName: " <> to_string(account["name"]) <> "\tAvailable Balance: " <> to_string(account["available_balance"]) <> "\tAvailable Credit: " <> to_string(account["available_credit"])
       IO.puts "Transactions"
-      transactions = Atrium.listAccountTransactions(userGUID, account["guid"])
+      transactions = Atrium.list_account_transactions(user_guid, account["guid"])
       Enum.each(transactions, fn transaction ->
         IO.puts "Date: " <> to_string(transaction["date"]) <> "\tDescription: " <> to_string(transaction["description"]) <> "\tAmount: " <> to_string(transaction["amount"])
       end)
@@ -126,47 +126,47 @@ defmodule ExampleWorkflow do
   def start() do
     {:ok, counter} = Agent.start_link fn -> 0 end
 
-    userGUID = String.trim(IO.gets("Please enter in user GUID. If not yet created just press enter key: "))
-    memberGUID = String.trim(IO.gets("\nPlease enter in member GUID. If not yet created just press enter key: "))
+    user_guid = String.trim(IO.gets("Please enter in user GUID. If not yet created just press enter key: "))
+    member_guid = String.trim(IO.gets("\nPlease enter in member GUID. If not yet created just press enter key: "))
     endUserPresent = String.trim(IO.gets("\nPlease enter in if end user is present (true or false): "))
 
-    if (userGUID == "") and (memberGUID != "") do
+    if (user_guid == "") and (member_guid != "") do
       IO.puts "\nMust include user GUID when member GUID is entered."
       System.halt(0)
     end
 
-    userGUID = if (userGUID == "") and (endUserPresent == "true") do
+    user_guid = if (user_guid == "") and (endUserPresent == "true") do
       IO.puts "\n* Creating user *"
 
       identifier = String.trim(IO.gets("\nPlease enter in an unique id for user: "))
 
-      user = Atrium.createUser(identifier: identifier)
+      user = Atrium.create_user(identifier: identifier)
       IO.puts "\nCreated user: " <> user["guid"]
       user["guid"]
     else
-      userGUID
+      user_guid
     end
 
-    if (memberGUID != "") and (endUserPresent == "true") do
-      Atrium.aggregateMember(userGUID, memberGUID)
-      checkJobStatus(userGUID, memberGUID, counter)
+    if (member_guid != "") and (endUserPresent == "true") do
+      Atrium.aggregate_member(user_guid, member_guid)
+      checkJobStatus(user_guid, member_guid, counter)
     else
-      if memberGUID != "" do
-        readAggregationData(userGUID, memberGUID)
+      if member_guid != "" do
+        readAggregationData(user_guid, member_guid)
       else
         if endUserPresent == "true" do
           IO.puts "\n* Creating new member *"
 
-          institutions = Atrium.listInstitutions()
+          institutions = Atrium.list_institutions()
 
           IO.puts "\n* Listing top 15 institutions *"
           Enum.each(institutions, fn institution ->
             IO.puts to_string(institution["name"]) <> " : institution code = " <> to_string(institution["code"])
           end)
 
-          institutionCode = String.trim(IO.gets("\nPlease enter in desired institution code: "))
+          institution_code = String.trim(IO.gets("\nPlease enter in desired institution code: "))
 
-          credentials = Atrium.readInstitutionCredentials(institutionCode)
+          credentials = Atrium.read_institution_credentials(institution_code)
 
           {:ok, updatedCredentials} = Agent.start_link fn -> [] end
           Enum.each(credentials, fn credential ->
@@ -176,11 +176,11 @@ defmodule ExampleWorkflow do
 
           creds = Agent.get(updatedCredentials, fn list -> list end)
 
-          member = Atrium.createMember(userGUID, creds, institutionCode)
+          member = Atrium.create_member(user_guid, creds, institution_code)
 
-          memberGUID = member["guid"]
-          IO.puts "\nCreated member: " <> memberGUID
-          checkJobStatus(userGUID, memberGUID, counter)
+          member_guid = member["guid"]
+          IO.puts "\nCreated member: " <> member_guid
+          checkJobStatus(user_guid, member_guid, counter)
         else
           IO.puts "\nEnd user must be present to create a new member"
           System.halt(0)
