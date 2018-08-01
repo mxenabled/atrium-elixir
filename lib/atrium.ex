@@ -238,6 +238,34 @@ defmodule Atrium do
     parsed_json["transactions"]
   end
 
+  # Required Parameters: user_guid, member_guid
+  # Optional Parameters: None
+  def verify_member(user_guid, member_guid) do
+    response =
+      make_request(
+        "POST",
+        "/users/" <> user_guid <> "/members/" <> member_guid <> "/verify",
+        ""
+      )
+
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["member"]
+  end
+
+  # Required Parameters: user_guid, member_guid
+  # Optional Parameters: None
+  def identify_member(user_guid, member_guid) do
+    response =
+      make_request(
+        "POST",
+        "/users/" <> user_guid <> "/members/" <> member_guid <> "/identify",
+        ""
+      )
+
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["member"]
+  end
+
   # ACCOUNT
 
   # Required Parameters: user_guid, account_guid
@@ -272,6 +300,52 @@ defmodule Atrium do
 
     {:ok, parsed_json} = Poison.decode(to_string(response))
     parsed_json["transactions"]
+  end
+
+  # ACCOUNT NUMBER
+
+  # Required Parameters: user_guid, account_guid
+  # Optional Parameters: None
+  def list_account_account_numbers(user_guid, account_guid) do
+    response =
+      make_request(
+        "GET",
+        "/users/" <> user_guid <> "/accounts/" <> account_guid <> "/account_numbers",
+        ""
+      )
+
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["account_numbers"]
+  end
+
+  # Required Parameters: user_guid, member_guid
+  # Optional Parameters: None
+  def list_member_account_numbers(user_guid, member_guid) do
+    response =
+      make_request(
+        "GET",
+        "/users/" <> user_guid <> "/members/" <> member_guid <> "/account_numbers",
+        ""
+      )
+
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["account_numbers"]
+  end
+
+  # ACCOUNT OWNER
+
+  # Required Parameters: user_guid, member_guid
+  # Optional Parameters: None
+  def list_member_account_owners(user_guid, member_guid) do
+    response =
+      make_request(
+        "GET",
+        "/users/" <> user_guid <> "/members/" <> member_guid <> "/account_owners",
+        ""
+      )
+
+    {:ok, parsed_json} = Poison.decode(to_string(response))
+    parsed_json["account_owners"]
   end
 
   # TRANSACTION
