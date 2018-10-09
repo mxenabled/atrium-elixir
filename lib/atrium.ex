@@ -350,6 +350,16 @@ defmodule Atrium do
 
   # TRANSACTION
 
+  # Required Parameter: list of transactions to categorize
+  def categorize_and_describe_transactions(transactions) do
+    body = Poison.encode!(transactions)
+
+    response = make_request("POST", "/categorize_and_describe", body)
+
+    {:ok, transactions_map} = Poison.decode(to_string(response))
+    transactions_map["transactions"]
+  end
+
   # Required Parameters: user_guid, transaction_guid
   # Optional Parameters: None
   def read_transaction(user_guid, transaction_guid) do
