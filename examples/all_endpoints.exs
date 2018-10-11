@@ -124,6 +124,34 @@ Enum.each(transactions, fn transaction ->
 end)
 transaction_guid = List.first(transactions)["guid"]
 
+IO.puts "\n************************** Categorize Transactions **************************"
+
+transactions = %{transactions: [
+    %{
+      amount: 11.22,
+      description: "BEER BAR 65000000764SALT LAKE C",
+      id: "12",
+      type: "DEBIT"
+    },
+    %{
+      amount: 21.33,
+      description: "IN-N-OUT BURGER #239AMERICAN FO",
+      id: "13",
+      type: "DEBIT"
+    },
+    %{
+      amount: 1595.33,
+      description: "ONLINE PAYMENT - THANK YOU",
+      id: "14",
+      type: "CREDIT"
+    }
+  ]
+}
+
+Atrium.categorize_and_describe_transactions(transactions)
+|> Enum.each(&IO.inspect/1)
+
+
 IO.puts "\n************************** Read a Transaction **************************"
 transaction = Atrium.read_transaction(user_guid, transaction_guid)
 IO.inspect transaction
