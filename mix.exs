@@ -6,7 +6,7 @@ defmodule Atrium.Mixfile do
       app: :atrium,
       version: "0.1.0",
       elixir: "~> 1.4",
-      start_permanent: Mix.env == :prod,
+      start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
   end
@@ -19,8 +19,8 @@ defmodule Atrium.Mixfile do
 
   defp deps do
     [
-      {:httpoison, "~> 0.13"},
-      {:poison, "~> 3.1"},
+      {:httpoison, "~> 1.5"},
+      {:poison, "~> 3.1"}
     ]
   end
 end
