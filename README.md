@@ -68,14 +68,33 @@ Example:
   end
   ```
 
-## Unit Tests
+## Testing
 
-The majority of the modules have unit tests that will pass if you add the appropriate API and ClientID keys to the config files.
+### Unit tests
 
-Use these as a reference on how to use the library
+Run: `mix test`
+
+The majority of the modules have sandbox unit tests that will not run unless specifically commanded to. They will then pass if you add the appropriate API and ClientID keys to the config files.
+
+The Unit Tests are provided to show what the anticipated response is from the API. Use these as a reference on how to use the library
+
+### Sandbox tests
+
+These test are hitting the actual sandbox of Atrium/Vestibule. They will create / update / delete objects in your company so be sure to use a development API kety.
+
+1. Run the test `mix test --only sandbox`
+
+#### Why we have Sandbox tests?
+
+In the best environment we should be using mock library and never hit the actual API, however during the development we found out that Atrium/Vestibue API is very often iterating quickly and returns something differently that you would expect. These Sandbox test which are hitting actual API helped us discover countless bugs we would not seen when doing mock.
+
+Unit tests also provide an ideal way to receive pull requests when something is found to have changed.
 
 ## Examples
 
-THESE ARE MOST LIKELY OUT DATED. USE THEM AS REFERENCE, BUT NOT LAW
+THESE ARE MOST LIKELY OUT DATED. USE THEM AS REFERENCE, BUT NOT LAW THE UNIT TESTS SHOULD BE USED AS REFERENCE FOR WHAT IS RETURNED FROM THE API.
 
-The `/examples` directory contains various workflows and code snippets. An example can be run by using `mix run examples/filename.exs`, substituting `filename.exs` with the name of the desired example.
+The `/examples` directory contains various workflows and code snippets. An example can be run by:
+
+1. running `iex -S mix`
+2. Running `Atrium.Examples.[MODULE].run_example()`
