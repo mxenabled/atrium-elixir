@@ -9,6 +9,7 @@ defmodule Atrium.ConnectTest do
   end
 
   describe "create_widget" do
+    @tag :sandbox
     test "create_widget/1" do
       {:ok, response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       user_guid = response["user"]["guid"]

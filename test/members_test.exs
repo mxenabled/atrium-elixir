@@ -9,6 +9,7 @@ defmodule Atrium.MembersTest do
   end
 
   describe "create_member" do
+    @tag :sandbox
     test "create_member/4" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -46,6 +47,7 @@ defmodule Atrium.MembersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_guid)
     end
 
+    @tag :sandbox
     test "create_member!/4" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -85,6 +87,7 @@ defmodule Atrium.MembersTest do
   end
 
   describe "read_member" do
+    @tag :sandbox
     test "read_member/2" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -125,6 +128,7 @@ defmodule Atrium.MembersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_guid)
     end
 
+    @tag :sandbox
     test "read_member!/2" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -166,6 +170,7 @@ defmodule Atrium.MembersTest do
   end
 
   describe "update_member" do
+    @tag :sandbox
     test "update_member/3" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -205,6 +210,7 @@ defmodule Atrium.MembersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_guid)
     end
 
+    @tag :sandbox
     test "update_member!/3" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -246,6 +252,7 @@ defmodule Atrium.MembersTest do
   end
 
   describe "delete_member" do
+    @tag :sandbox
     test "delete_member/2" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -267,6 +274,7 @@ defmodule Atrium.MembersTest do
   end
 
   describe "list_members" do
+    @tag :sandbox
     test "list_members/2" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -313,6 +321,7 @@ defmodule Atrium.MembersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_guid)
     end
 
+    @tag :sandbox
     test "list_members!/2" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -361,6 +370,7 @@ defmodule Atrium.MembersTest do
   end
 
   describe "aggregate_member" do
+    @tag :sandbox
     test "aggregate_member/2" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -399,6 +409,7 @@ defmodule Atrium.MembersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_guid)
     end
 
+    @tag :sandbox
     test "aggregate_member!/2" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -439,6 +450,7 @@ defmodule Atrium.MembersTest do
   end
 
   describe "read_member_connection_status" do
+    @tag :sandbox
     test "read_member_connection_status/2" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -476,6 +488,7 @@ defmodule Atrium.MembersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_guid)
     end
 
+    @tag :sandbox
     test "read_member_connection_status!/2" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -515,6 +528,7 @@ defmodule Atrium.MembersTest do
   end
 
   describe "list_member_mfa_challenges" do
+    @tag :sandbox
     test "list_member_mfa_challenges/3" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -538,6 +552,7 @@ defmodule Atrium.MembersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_guid)
     end
 
+    @tag :sandbox
     test "list_member_mfa_challenges!/3" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -569,6 +584,7 @@ defmodule Atrium.MembersTest do
   end
 
   describe "list_member_credentials" do
+    @tag :sandbox
     test "list_member_credentials/3" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -610,6 +626,7 @@ defmodule Atrium.MembersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_guid)
     end
 
+    @tag :sandbox
     test "list_member_credentials!/3" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -653,6 +670,7 @@ defmodule Atrium.MembersTest do
   end
 
   describe "list_member_accounts" do
+    @tag :sandbox
     test "list_member_accounts/3" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -685,6 +703,7 @@ defmodule Atrium.MembersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_guid)
     end
 
+    @tag :sandbox
     test "list_member_accounts!/3" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -719,6 +738,7 @@ defmodule Atrium.MembersTest do
   end
 
   describe "list_member_transactions" do
+    @tag :sandbox
     test "list_member_transactions/3" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")
@@ -751,6 +771,7 @@ defmodule Atrium.MembersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_guid)
     end
 
+    @tag :sandbox
     test "list_member_transactions!/3" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       {:ok, institution_credential_response} = Institutions.read_institution_credentials("mxbank")

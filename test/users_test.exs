@@ -20,6 +20,7 @@ defmodule Atrium.UsersTest do
   end
 
   describe "create_user" do
+    @tag :sandbox
     test "create_user/1" do
       assert {:ok, response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
 
@@ -36,6 +37,7 @@ defmodule Atrium.UsersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(response["user"]["guid"])
     end
 
+    @tag :sandbox
     test "create_user!/1" do
       response = Users.create_user!(metadata: "{\"first_name\": \"Steven\"}")
 
@@ -54,6 +56,7 @@ defmodule Atrium.UsersTest do
   end
 
   describe "read_user" do
+    @tag :sandbox
     test "read_user/1" do
       {:ok, response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       user_guid = response["user"]["guid"]
@@ -73,6 +76,7 @@ defmodule Atrium.UsersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_guid)
     end
 
+    @tag :sandbox
     test "read_user!/1" do
       {:ok, response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       user_guid = response["user"]["guid"]
@@ -94,6 +98,7 @@ defmodule Atrium.UsersTest do
   end
 
   describe "update_user" do
+    @tag :sandbox
     test "update_user/1" do
       {:ok, response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       user_guid = response["user"]["guid"]
@@ -114,6 +119,7 @@ defmodule Atrium.UsersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_guid)
     end
 
+    @tag :sandbox
     test "update_user!/1" do
       {:ok, response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       user_guid = response["user"]["guid"]
@@ -135,6 +141,7 @@ defmodule Atrium.UsersTest do
   end
 
   describe "delete_user" do
+    @tag :sandbox
     test "delete_user/1" do
       {:ok, response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
       user_guid = response["user"]["guid"]
@@ -144,6 +151,7 @@ defmodule Atrium.UsersTest do
   end
 
   describe "list_users" do
+    @tag :sandbox
     test "list_users/1" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
 
@@ -170,6 +178,7 @@ defmodule Atrium.UsersTest do
       assert {:ok, "204: No Content"} = Users.delete_user(user_response["user"]["guid"])
     end
 
+    @tag :sandbox
     test "list_users!/1" do
       {:ok, user_response} = Users.create_user(metadata: "{\"first_name\": \"Steven\"}")
 

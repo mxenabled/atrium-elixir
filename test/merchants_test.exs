@@ -5,6 +5,7 @@ defmodule Atrium.MerchantsTest do
   alias Atrium.Merchants
 
   describe "read_merchants" do
+    @tag :sandbox
     test "read_merchant/1" do
       assert {:ok, response} = Merchants.read_merchant("MCH-4a889eb0-0459-f66f-a137-c5e06409d8e6")
 
@@ -21,6 +22,7 @@ defmodule Atrium.MerchantsTest do
              } = response
     end
 
+    @tag :sandbox
     test "read_merchant!/1" do
       response = Merchants.read_merchant!("MCH-4a889eb0-0459-f66f-a137-c5e06409d8e6")
 

@@ -9,6 +9,7 @@ defmodule Atrium.InstitutionsTest do
   end
 
   describe "read_institution" do
+    @tag :sandbox
     test "read_institution/1" do
       {:ok, response} = Institutions.read_institution("mxbank")
 
@@ -29,6 +30,7 @@ defmodule Atrium.InstitutionsTest do
              } = response
     end
 
+    @tag :sandbox
     test "read_institution!/1" do
       response = Institutions.read_institution!("mxbank")
 
@@ -51,6 +53,7 @@ defmodule Atrium.InstitutionsTest do
   end
 
   describe "list_institutions" do
+    @tag :sandbox
     test "list_institutions/1" do
       {:ok, response} = Institutions.list_institutions(name: "mx")
 
@@ -79,6 +82,7 @@ defmodule Atrium.InstitutionsTest do
              } = response
     end
 
+    @tag :sandbox
     test "list_institutions!/1" do
       response = Institutions.list_institutions!(name: "mx")
 
@@ -109,6 +113,7 @@ defmodule Atrium.InstitutionsTest do
   end
 
   describe "read_institution_credentials" do
+    @tag :sandbox
     test "read_institution_credentials/1" do
       {:ok, response} = Institutions.read_institution_credentials("mxbank")
 
@@ -132,6 +137,7 @@ defmodule Atrium.InstitutionsTest do
              } = response
     end
 
+    @tag :sandbox
     test "read_institution_credentials!/1" do
       response = Institutions.read_institution_credentials!("mxbank")
 

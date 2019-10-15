@@ -19,6 +19,7 @@ defmodule Atrium.TransactionsTest do
   end
 
   describe "categorize_and_describe_transactions" do
+    @tag :sandbox
     test "categorize_and_describe_transactions/1" do
       transactions = %{
         transactions: [
@@ -102,6 +103,7 @@ defmodule Atrium.TransactionsTest do
              } = response
     end
 
+    @tag :sandbox
     test "categorize_and_describe_transactions!/1" do
       transactions = %{
         transactions: [
