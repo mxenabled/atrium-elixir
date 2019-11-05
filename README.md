@@ -31,7 +31,7 @@ You can then self-host this library and pull it into your application as a depen
 
 ### Injecting the API KEYS into the library from Application startup (Recommended)
 
-Instead of saving your api keys inside the library and storing them in the repo, instead inserted the keys into the library when your application starts up
+Instead of saving your api keys inside the library and storing them in the repo, please insert the keys into the library when your application starts up
 
 Example:
 
