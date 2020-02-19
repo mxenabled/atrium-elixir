@@ -2,7 +2,7 @@ defmodule Atrium.Members do
   @moduledoc """
   Functions for interacting with the `members` endpoint of Atrium.
   """
-  alias Atrium.{Request, Response}
+  alias Atrium.{JSON, Request, Response}
 
   @doc """
   Required Parameters: user_guid, credentials, institution_code
@@ -20,7 +20,7 @@ defmodule Atrium.Members do
       |> Map.put(:institution_code, institution_code)
       |> Map.put(:credentials, credentials)
 
-    body = Poison.encode!(%{member: data})
+    body = JSON.encode!(%{member: data})
     url = "/users/" <> user_guid <> "/members"
 
     Request.make_request(:post, url, body)
@@ -43,7 +43,7 @@ defmodule Atrium.Members do
       |> Map.put(:institution_code, institution_code)
       |> Map.put(:credentials, credentials)
 
-    body = Poison.encode!(%{member: data})
+    body = JSON.encode!(%{member: data})
 
     url = "/users/" <> user_guid <> "/members"
 
@@ -93,7 +93,7 @@ defmodule Atrium.Members do
       |> Enum.filter(fn {_k, v} -> not is_nil(v) end)
       |> Enum.into(%{})
 
-    body = Poison.encode!(%{member: data})
+    body = JSON.encode!(%{member: data})
     url = "/users/" <> user_guid <> "/members/" <> member_guid
 
     Request.make_request(:put, url, body)
@@ -114,7 +114,7 @@ defmodule Atrium.Members do
       |> Enum.filter(fn {_k, v} -> not is_nil(v) end)
       |> Enum.into(%{})
 
-    body = Poison.encode!(%{member: data})
+    body = JSON.encode!(%{member: data})
 
     url = "/users/" <> user_guid <> "/members/" <> member_guid
 
@@ -270,7 +270,7 @@ defmodule Atrium.Members do
           {:ok, Map.t()} | {:error, String.t()}
   def resume_member_aggregate(user_guid, member_guid, answers) do
     data = %{member: %{challenges: answers}}
-    body = Poison.encode!(data)
+    body = JSON.encode!(data)
     url = "/users/" <> user_guid <> "/members/" <> member_guid <> "/resume"
 
     Request.make_request(:put, url, body)
@@ -287,7 +287,7 @@ defmodule Atrium.Members do
           Map.t() | {:error, String.t()}
   def resume_member_aggregate!(user_guid, member_guid, answers) do
     data = %{member: %{challenges: answers}}
-    body = Poison.encode!(data)
+    body = JSON.encode!(data)
     url = "/users/" <> user_guid <> "/members/" <> member_guid <> "/resume"
 
     Request.make_request(:put, url, body)

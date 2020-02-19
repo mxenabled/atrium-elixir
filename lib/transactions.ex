@@ -3,7 +3,7 @@ defmodule Atrium.Transactions do
   Functions that allow you to interact with the transaction atrium endpoint
   """
 
-  alias Atrium.{Request, Response}
+  alias Atrium.{JSON, Request, Response}
 
   @doc """
   Required Parameters: user_guid, transaction_guid
@@ -72,7 +72,7 @@ defmodule Atrium.Transactions do
   @spec categorize_and_describe_transactions(list(Map.t())) ::
           {:ok, Map.t()} | {:error, String.t()}
   def categorize_and_describe_transactions(transactions) do
-    body = Poison.encode!(transactions)
+    body = JSON.encode!(transactions)
     url = "/transactions/cleanse_and_categorize"
 
     Request.make_request(:post, url, body)
@@ -88,7 +88,7 @@ defmodule Atrium.Transactions do
   @spec categorize_and_describe_transactions!(list(Map.t())) ::
           Map.t() | {:error, String.t()}
   def categorize_and_describe_transactions!(transactions) do
-    body = Poison.encode!(transactions)
+    body = JSON.encode!(transactions)
     url = "/transactions/cleanse_and_categorize"
 
     Request.make_request(:post, url, body)

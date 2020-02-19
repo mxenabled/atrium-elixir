@@ -20,7 +20,7 @@ defmodule Atrium.Response do
   end
 
   defp decode_response_body(body) do
-    {:ok, parsed_json} = Poison.decode(to_string(body))
+    {:ok, parsed_json} = Atrium.JSON.decode(to_string(body))
     parsed_json
   end
 
@@ -44,7 +44,7 @@ defmodule Atrium.Response do
   Takes the result of a Request.make_request.
   Returns either an Map.t() or raises an error
   """
-  @spec handle_response({:ok, Map.t()} | {:error, String.t()}) ::
+  @spec handle_response!({:ok, Map.t()} | {:error, String.t()}) ::
           Map.t() | no_return
   def handle_response!(response) do
     case response do

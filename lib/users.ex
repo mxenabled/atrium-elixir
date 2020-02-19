@@ -2,7 +2,7 @@ defmodule Atrium.Users do
   @moduledoc """
   Functions for interacting with the `users` endpoint of Atrium.
   """
-  alias Atrium.{Request, Response}
+  alias Atrium.{JSON, Request, Response}
 
   @doc """
   Required Parameters: none
@@ -15,7 +15,7 @@ defmodule Atrium.Users do
   """
   @spec create_user(Keyword.t()) :: {:ok, Map.t()} | {:error, String.t()}
   def create_user(options \\ []) do
-    body = Poison.encode!(%{user: Enum.into(options, %{})})
+    body = JSON.encode!(%{user: Enum.into(options, %{})})
     url = "/users"
 
     Request.make_request(:post, url, body)
@@ -33,7 +33,7 @@ defmodule Atrium.Users do
   """
   @spec create_user!(Keyword.t()) :: Map.t() | {:error, String.t()}
   def create_user!(options \\ []) do
-    body = Poison.encode!(%{user: Enum.into(options, %{})})
+    body = JSON.encode!(%{user: Enum.into(options, %{})})
     url = "/users"
 
     Request.make_request(:post, url, body)
@@ -79,7 +79,7 @@ defmodule Atrium.Users do
   """
   @spec update_user(String.t(), Keyword.t()) :: {:ok, Map.t()} | {:error, String.t()}
   def update_user(user_guid, options \\ []) do
-    body = Poison.encode!(%{user: Enum.into(options, %{})})
+    body = JSON.encode!(%{user: Enum.into(options, %{})})
     url = "/users/" <> user_guid
 
     Request.make_request(:put, url, body)
@@ -97,7 +97,7 @@ defmodule Atrium.Users do
   """
   @spec update_user!(String.t(), Keyword.t()) :: Map.t() | {:error, String.t()}
   def update_user!(user_guid, options \\ []) do
-    body = Poison.encode!(%{user: Enum.into(options, %{})})
+    body = JSON.encode!(%{user: Enum.into(options, %{})})
 
     url = "/users/" <> user_guid
 
