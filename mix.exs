@@ -20,7 +20,7 @@ defmodule Atrium.Mixfile do
   defp deps do
     [
       {:httpoison, "~> 1.5"},
-      {:poison, "~> 3.1"}
+      {:jason, "~> 1.1"}
     ]
   end
 end

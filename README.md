@@ -2,6 +2,31 @@
 
 An Elixir wrapper for the [MX Atrium API](https://atrium.mx.com). In order to make requests, you will need to [sign up for the MX Atrium API](https://atrium.mx.com/developers/sign_up) and get a `MX-API-KEY` and a `MX-CLIENT-ID`.
 
+## Installation
+
+This is currently not published on https://hex.pm, but you can add the
+dependency by referencing github when including in your `mix.exs`:
+
+```elixir
+def deps() do
+  ...
+  {:atrium, github: "mxenabled/atrium-elixir"},
+  ...
+end
+```
+
+## Configuration
+
+## JSON serializer
+
+[`Jason`](https://hex.pm/packages/jason) is the default JSON serializer.
+
+To use a different a different serializer, set it in your `config.exs`
+
+```elixir
+config :atrium, serializer: Poison
+```
+
 ## Usage
 
 There are two ways to utilize this library:
@@ -26,8 +51,6 @@ If you want to test out the library using IEx or the unit tests, then you will n
 Next, run `mix deps.get` to get the required dependencies.
 
 From there you can start using methods to make calls to the Atrium API for data. See the full [Atrium documentation](https://atrium.mx.com/documentation) for more details.
-
-You can then self-host this library and pull it into your application as a dependency from your appropriate repo provider.
 
 ### Injecting the API KEYS into the library from Application startup (Recommended)
 
